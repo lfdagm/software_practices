@@ -9,7 +9,7 @@ entity      Book
 
 == Borrowing a Book ==
 
-Member->Librarian: Request to borrow book
+Member->Librarian: Borrow book request
 activate Member
 activate Librarian
 Librarian->BS: Check availability of requested book
@@ -19,14 +19,31 @@ activate Book
 Book --> BS: Available/Not Available
 deactivate Book
 BS-->Librarian: Display availability message
-Librarian->Member: Inform result of borrowing
+deactivate BS
+Librarian-->Member: Notify borrowing result
 
 alt Book Available
+    
     Librarian->BS: Create borrowing request
+    activate BS
     BS->Book: Update book status to "Borrowed"
     BS->Librarian: Record member borrowing
     deactivate BS
     Librarian->Member: Give book
+
+else Book not available
+    opt Member chooses to reserve unavailable book
+        Member->Librarian: Request to reserve book
+        activate BS
+        Librarian->BS: Create reservation
+        BS->Book: Update book status to "Reserved"
+        BS-->Librarian: Display reservation confirmation
+        deactivate BS
+        Librarian-->Member: Confirm reservation
+
+
+end
+
 end
 
 deactivate Librarian
@@ -40,9 +57,9 @@ activate Librarian
 Librarian->BS: Record member return
 activate BS
 BS->Book: Update book status as "Available"
-BS->Librarian: Display return confirmation 
+BS-->Librarian: Display return confirmation 
 deactivate BS
-Librarian->Member: Inform successful return 
+Librarian-->Member: Confirm return success
 deactivate Librarian
 deactivate Member
 
